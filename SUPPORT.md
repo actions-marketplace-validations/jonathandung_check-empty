@@ -2,7 +2,7 @@
 
 Thank you for using check-empty! This document outlines how to get help.
 
-Before jumping to seek support, do skim through
+Before jumping to seek support as follows, do skim through
 [the readme](https://github.com/jonathandung/check-empty#check-empty).
 
 ## Bug Reports
@@ -43,14 +43,20 @@ For quick questions, consider:
 
 Update your package installer, then try the following fixes:
 
+If installed as a tool:
+
 ```bash
 uv tool install -U check-empty # Upgrade
 uv tool uninstall check-empty && uv tool install check-empty # Clean install
 ```
 
-Other (slower) package managers:
+If installed as a package:
 
 ```bash
+# uv
+uv pip install -U check-empty # Upgrade
+uv pip uninstall check-empty && uv pip install check-empty # Clean install
+
 # pip
 pip install -U check-empty # Upgrade
 pip uninstall check-empty && pip install check-empty # Clean install
@@ -65,13 +71,8 @@ pipx ensurepath
 Check if check-empty is installed:
 
 ```bash
-pip list | grep check-empty
-# or
-pip show check-empty
-
-# uv
-uv tool list # if installed as a tool
-uv pip show check-empty # if installed as a package
+pip show check-empty # pip
+uv pip show check-empty # uv
 ```
 
 If the package is not working, check `sys.path` in your Python installation.

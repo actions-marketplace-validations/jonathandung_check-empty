@@ -9,28 +9,26 @@ from __future__ import annotations
 
 import os
 
-__all__ = ('check',)
-__version__ = '0.9.0'
+__all__ = ('ExitCode', 'check')
+__version__ = '1.2.2'
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    import typing
     from collections.abc import Iterable
-    from typing import IO
 
     from _typeshed import FileDescriptorOrPath
-    from typing_extensions import Literal, SupportsIndex, TypeAlias
 
-    ExitCode: TypeAlias = Literal[0, 1, 4, 5, 8, 9, 12, 13]
+    ExitCode: typing.TypeAlias = typing.Literal[0, 1, 4, 5, 8, 9, 12, 13]
 else:
     ExitCode = int
-DIRECTORY_DESCRIPTOR_UNSUPPORTED: BaseException = (
-    SystemError('somehow got directory descriptor on Windows')
+_DIRECTORY_DESCRIPTOR_UNSUPPORTED: BaseException = (
+    SystemError('got directory descriptor on Windows')
     if os.name == 'nt'
     else NotImplementedError('directory descriptors are not supported')
 )
-
-TYPE_MASK: int = 0xF000
-S_IFDIR: int = 0x4000
+_TYPE_MASK: int = 0xF000
+_S_IFDIR: int = 0x4000
 
 
 class _Handler:
@@ -44,18 +42,17 @@ class _Handler:
         self.c = False
         return self
 
+    def o(self):
+        with self, open(self.a, 'wb'):
+            ...
+
     @property
     def e(self, s='invalid fd (negative): %d', t='fd: %d'):  # ruff: ignore[property-with-parameters]
         r = self.v
-        if r is not None:
-            return r
-        a = self.a
-        self.v = r = (s if a < 0 else t) % a if isinstance(a, int) else os.fsdecode(a)
+        if r is None:
+            a = self.a
+            self.v = r = (t, s)[a < 0] % a if isinstance(a, int) else os.fsdecode(a)
         return r
-
-    def __call__(self):
-        with self, open(self.a, 'wb'):
-            ...
 
     def __exit__(self, t, v, _):
         if t is None or not issubclass(t, OSError):
@@ -65,42 +62,40 @@ class _Handler:
         return True
 
 
-def check(  # ruff: ignore[too-many-branches, too-many-locals, too-many-statements]
+def check(
     files: Iterable[FileDescriptorOrPath],
     *,
     clear: bool = False,
     may_not_exist: bool = False,
-    verbosity: SupportsIndex = 2,
-    out: IO[str] | None = None,
+    verbosity: typing.SupportsIndex = 2,
+    out: typing.IO[str] | None = None,
 ) -> ExitCode:
     """Check the emptiness of files, recursing into directories if passed.
 
     Args:
         files: an iterable of file descriptors or paths representing the files and
-        directories to check; directory descriptors (Unix) are not supported.
-        clear: if True, clear the contents of non-empty files; directories, notably,
-        are not purged, but all files within should become empty.
-        may_not_exist: if True, do not treat absent files or directories as errors.
-        verbosity: how much detail the program should print to stdout; if 0, print
-        nothing; verbosity > 5 is equivalent to verbosity = 5.
-        out: The file to which output is printed; default `sys.stdout`.
+          directories to check; directory descriptors (Unix) are not supported.
+        clear: if ``True``, clear the contents of non-empty files; directories, notably,
+          are not purged, but all files within should become empty.
+        may_not_exist: if ``True``, do not treat absent files or directories as errors.
+        verbosity: how much detail the program should print to stdout; verbosity > 5 is
+          equivalent to verbosity = 5, and a non-positive verbosity gives no output.
+        out: The file to which output is printed; default :data:`sys.stdout`.
 
     Returns:
         The integer exit code. A bitwise or of 1 (some files were not empty), 4 (some
-        files or directories were absent and `-m`/`--may-not-exist` was omitted) and 8
-        (caught OSError while processing some files), such that 0 is correctly the only
+        files or directories were absent and :ref:`-m <check-empty--m>` /
+        :ref:`--may-not-exist <check-empty---may-not-exist>` was omitted) and 8 (caught
+        :exc:`OSError` while processing some files), such that 0 is correctly the only
         return value that represents success. The 2 bit is skipped since 2 is the exit
-        code of `argparse.ArgumentParser` when it encounters invalid arguments.
+        code of :class:`argparse.ArgumentParser` when it encounters invalid arguments.
 
     """
     files = list(files)
     if not files:
         return 0
     k, j, t, n, o = [0] * 4, [], 0, len(files), files.pop
-    u, e = j.extend, j.pop
-
-    def _(v):
-        return lambda _, k=k: k.__setitem__(v, k[v] + 1)
+    u, e, _ = j.extend, j.pop, lambda v: lambda _, k=k: k.__setitem__(v, k[v] + 1)
 
     verbosity = type(verbosity).__index__(verbosity)
     if verbosity > 4:
@@ -110,12 +105,9 @@ def check(  # ruff: ignore[too-many-branches, too-many-locals, too-many-statemen
         b, f = None, _(0)
     if verbosity > 3:
         rc = ['']
-        ra = rc.append
+        x = rc.append
     else:
-        rc = None
-
-        def ra(_): ...
-
+        rc, x = None, lambda _: None
     if verbosity > 2:
         z, w = [''], ['']
         i = z.append, w.append
@@ -134,10 +126,10 @@ def check(  # ruff: ignore[too-many-branches, too-many-locals, too-many-statemen
         if h.c:
             continue
         c = h.e
-        if q.st_mode & TYPE_MASK == S_IFDIR:
+        if q.st_mode & _TYPE_MASK == _S_IFDIR:
             if isinstance(a, int):
-                raise DIRECTORY_DESCRIPTOR_UNSUPPORTED
-            ra(c)
+                raise _DIRECTORY_DESCRIPTOR_UNSUPPORTED
+            x(c)
             u(os.scandir(c))
             continue
         s = q.st_size
@@ -147,13 +139,13 @@ def check(  # ruff: ignore[too-many-branches, too-many-locals, too-many-statemen
         g(f'{c} ({s} bytes)')
         t += s
         if clear:
-            h()
+            h.o()
     del o, files
     while j:
         m = e()
         a = m.path
         if m.is_dir():
-            ra(a)
+            x(a)
             u(os.scandir(a))
             continue
         n += 1
@@ -164,37 +156,40 @@ def check(  # ruff: ignore[too-many-branches, too-many-locals, too-many-statemen
         g(f'{a} ({s} bytes)')
         t += s
         if clear:
-            _Handler(*i, a)()
+            _Handler(*i, a).o()
     x = k[1] if z is None else len(z) - 1
     y = k[3] if r is None else len(r) - 1
     d = k[2] if w is None else len(w) - 1
     v = bool(y) | (bool(x) and not may_not_exist) << 2 | bool(d) << 3
     if verbosity <= 0:
         return v  # ty: ignore[invalid-return-type]
-    fw = (__import__('sys').stdout if out is None else out).write
+    q = (__import__('sys').stdout if out is None else out).write
     if rc is not None:
-        fw('\nRecursing into directory: '.join(rc))
-        fw('\n\n')
+        q('\nRecursing into directory: '.join(rc))
+        q('\n\n')
     if z is not None:
-        fw('\nNot found: '.join(z))
-        fw('\n')
-    fw(f'{x} file{"s" if x > 1 else ""} not found\n' if x else 'All files were found\n')
+        q('\nNot found: '.join(z))
+        q('\n')
+    q(f'{x} file{"s" if x > 1 else ""} not found\n' if x else 'All files were found\n')
     if w is not None:
-        fw('\nError: '.join(w))
-        fw('\n')
+        q('\nError: '.join(w))
+        q('\n')
     if d:
-        fw(f'{d} I/O error{"s" if d > 1 else ""} encountered\n')
+        q(f'{d} I/O error{"s" if d > 1 else ""} encountered\n')
     if b is not None:
-        fw('\nEmpty: '.join(b))
-        fw('\n')
+        q('\nEmpty: '.join(b))
+        q('\n')
     if verbosity > 2:
         p = k[0] if b is None else len(b) - 1
-        fw(f'{p} empty file{"" if p == 1 else "s"}\n' if p else 'No empty files\n')
+        q(f'{p or "No"} empty file{"" if p == 1 else "s"}\n')
     if y:
         if r is not None:
-            fw(('\nCleared: ' if clear else '\nNot empty: ').join(r))
-            fw('\n\n')
-        fw(f'{y} offending file{"s" if y > 1 else ""}\nTotal size: {t} bytes\n')
+            q(('\nCleared: ' if clear else '\nNot empty: ').join(r))
+            q('\n\n')
+        q(f'{y} offending file{"s" if y > 1 else ""}\nTotal size: {t} bytes\n')
     elif n > x:
-        fw('All found files were empty\n')
+        q('All found files were empty\n')
     return v  # ty: ignore[invalid-return-type]
+
+
+del TYPE_CHECKING

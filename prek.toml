@@ -1,28 +1,29 @@
 [[repos]]
 repo = "builtin"
 hooks = [
-  {id = "check-added-large-files", args = ["--maxkb=50", "--enforce-all"]},
+  {id = "check-added-large-files", args = ["--maxkb=50", "--enforce-all"], exclude = '^uv.lock$'},
   {id = "check-case-conflict"}, {id = "check-executables-have-shebangs"}, {id = "check-illegal-windows-names"},
   {id = "check-merge-conflict"}, {id = "check-shebang-scripts-are-executable"}, {id = "check-toml"},
-  {id = "check-yaml"}, {id = "end-of-file-fixer"}, {id = "trailing-whitespace"}
+  {id = "check-yaml"}, {id = "end-of-file-fixer"}, {id = "trailing-whitespace"},
+  {id = "file-contents-sorter", files = '^(\.github/CODEOWNERS|\..*ignore)$'}
 ]
 
 [[repos]]
 repo = "https://github.com/abravalheri/validate-pyproject"
-rev = "v0.25"
+rev = "0.26"
 hooks = [{id = "validate-pyproject"}]
 
 [[repos]]
-repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.1"
-hooks = [{id = "ruff-check", types_or = ["python", "pyi", "pyproject"]}, {id = "ruff-format"}]
+repo = "https://github.com/betterleaks/betterleaks"
+rev = "v1.8.1"
+hooks = [{id = "betterleaks"}]
 
 [[repos]]
-repo = "https://github.com/astral-sh/ty-pre-commit"
-rev = "v0.0.65"
-hooks = [{id = "ty"}]
+repo = "https://github.com/sphinx-contrib/sphinx-lint"
+rev = "v1.0.2"
+hooks = [{id = "sphinx-lint"}]
 
 [[repos]]
-repo = "https://github.com/Yelp/detect-secrets"
-rev = "v1.5.0"
-hooks = [{id = "detect-secrets", args = ["--baseline", ".secrets.baseline"]}]
+repo = "https://github.com/jonathandung/check-empty"
+rev = "v1.2.1"
+hooks = [{id = "check-empty", files = '^check_empty/py\.typed$'}]

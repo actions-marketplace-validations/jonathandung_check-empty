@@ -1,11 +1,11 @@
 [build-system]
-requires = ["uv_build>=0.12.0"]
+requires = ["uv_build>=0.12.10"]
 build-backend = "uv_build"
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
-classifiers = ["Development Status :: 3 - Alpha", "Environment :: Console", "Intended Audience :: Developers", "Natural Language :: English", "Operating System :: OS Independent", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Python :: Free Threading :: 3 - Stable", "Topic :: Utilities", "Typing :: Typed"]
-description = "Command-line utility, as well as a hook usable by the Python pre-commit framework and a GitHub Action, to ensure that selected files are empty."
+classifiers = ["Development Status :: 5 - Production/Stable", "Environment :: Console", "Intended Audience :: Developers", "Natural Language :: English", "Operating System :: OS Independent", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Python :: 3.16", "Programming Language :: Python :: Free Threading :: 3 - Stable", "Topic :: Utilities", "Typing :: Typed"]
+description = "Command-line utility, as well as a hook usable by the Python pre-commit framework, and a GitHub Action, to ensure that selected files are empty."
 keywords = ["check", "command-line", "empty", "files", "github-action", "helper", "hook", "lightweight", "pre-commit", "prek", "tool", "utility"]
 license = "MIT"
 license-files = ["LICENSE", "AUTHORS.md"]
@@ -13,12 +13,16 @@ maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 name = "check-empty"
 readme = "README.md"
 requires-python = ">=3.6"
-version = "0.9.0"
+version = "1.2.2"
+
+[dependency-groups]
+docs = ["furo==2025.12.19", "sphinx==9.1.0", "sphinx-argparse-cli==1.22.1", "sphinx-copybutton==0.5.2", "sphinx-lint==1.0.2", "sphinx-notfound-page==1.1.0"]
 
 [project.scripts]
 check-empty = "check_empty.__main__:main"
 
 [tool.ruff]
+required-version = ">=0.16.6"
 target-version = "py37"
 
 [tool.ruff.analyze]
@@ -28,7 +32,7 @@ type-checking-imports = false
 quote-style = "single"
 
 [tool.ruff.lint]
-ignore = ["ANN", "COM", "FBT", "PT", "PTH", "avoidable-escaped-quote", "bad-quotes-inline-string", "complex-structure", "docstring-extraneous-exception", "import-outside-top-level", "incorrect-blank-line-before-class", "magic-value-comparison", "multi-line-summary-second-line", "non-empty-init-module", "print", "unnecessary-dunder-call"]
+ignore = ["ANN", "COM", "FBT", "PT", "PTH", "avoidable-escaped-quote", "bad-quotes-inline-string", "complex-structure", "docstring-extraneous-exception", "implicit-namespace-package", "import-outside-top-level", "incorrect-blank-line-before-class", "magic-value-comparison", "multi-line-summary-second-line", "non-empty-init-module", "print", "too-many-branches", "too-many-locals", "too-many-statements", "unnecessary-dunder-call"]
 preview = true
 select = ["ALL"]
 
@@ -54,8 +58,11 @@ all = "error"
 missing-override-decorator = "ignore"
 
 [tool.uv]
-required-version = ">=0.12.0"
+required-version = ">=0.12.10"
 
 [tool.uv.build-backend]
 module-name = "check_empty"
 module-root = ""
+
+[tool.uv.dependency-groups]
+docs = {requires-python = ">=3.12"}

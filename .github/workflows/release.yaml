@@ -11,12 +11,16 @@ jobs:
       name: pypi
       url: https://pypi.org/p/check-empty/${{github.ref_name}}
     steps:
-      - uses: actions/checkout@v7.0.0
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          enable-cache: false
       - run: uv build
       - run: uv publish
-      - uses: softprops/action-gh-release@v3.0.2
-        with:
-          discussion_category_name: Releases
-          generate_release_notes: true
-          prerelease: true
+      - run: gh release create "$TAG" --title "$TAG" --generate-notes --discussion-category "Releases"
+        env:
+          GH_TOKEN: ${{github.token}}
+          TAG: ${{github.ref_name}}
+    timeout-minutes: 2

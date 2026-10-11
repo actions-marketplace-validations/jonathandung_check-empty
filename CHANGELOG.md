@@ -4,6 +4,12 @@ All notable changes to this project are and will be documented in this file.
 
 This project has used [Semantic Versioning](https://semver.org) starting from v2.0.0.
 
+## [4.0]
+
+### [4.0.0] - 2026-10-11
+
+Action bugfix; reporter API change.
+
 ## [3.0]
 
 ### [3.0.1] - 2026-09-27

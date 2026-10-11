@@ -34,10 +34,11 @@ class Reporter(abcdef.ReporterABC):
     def report(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
         self,
         z: list[str] | None,
-        w: list[OSError] | None,
         a: list[str] | None,
         b: list[str] | None,
+        e: list[str] | None,
         r: list[tuple[str, int]] | None,
+        w: list[OSError] | None,
         x: int,
         y: int,
         d: int,
@@ -59,6 +60,8 @@ class Reporter(abcdef.ReporterABC):
         q = (s.stdout if q is None else q).write
         if a is not None:
             q('\nRecursing into directory: '.join(a))
+        if e is not None:
+            q('\nRecursing into archive: '.join(e))
         if z is not None:
             q('\nNot found: '.join(z))
         q(

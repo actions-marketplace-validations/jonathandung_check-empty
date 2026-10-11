@@ -22,10 +22,11 @@ class ReporterABC(metaclass=a.ABCMeta):
     def report(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
         self,
         z: list[str] | None,
-        w: list[OSError] | None,
         a: list[str] | None,
         b: list[str] | None,
+        e: list[str] | None,
         r: list[tuple[str, int]] | None,
+        w: list[OSError] | None,
         x: int,
         y: int,
         d: int,
@@ -39,11 +40,18 @@ class ReporterABC(metaclass=a.ABCMeta):
         """Report the results of the check.
 
         Args:
-            z: list of paths to files that were not found.
-            w: list of I/O errors when processing non-missing files.
-            a: list of directories that were recursed into.
-            b: list of empty file paths.
-            r: list of 2-tuples representing non-empty files and their sizes.
+            z: list of paths to files that were not found, or ``None`` if ``v`` is less
+              than 3; the first element of the list is an empty string.
+            a: list of paths to directories that were recursed into, or ``None`` if
+              ``v`` is less than 4; the first element of the list is an empty string.
+            b: list of empty file paths, or ``None`` if ``v`` is less than 5; the first
+              element of the list is an empty string.
+            e: list of paths to archives that were recursed into, or ``None`` if
+              ``v`` is less than 4; the first element of the list is an empty string.
+            r: list of 2-tuples representing non-empty files and their sizes, or
+              ``None`` if ``v`` is less than 2.
+            w: list of I/O errors when processing non-missing files, or ``None`` if
+              ``v`` is less than 3.
             x: number of files that were not found.
             y: number of non-empty files.
             d: number of I/O errors encountered.
@@ -72,7 +80,7 @@ class ReporterABC(metaclass=a.ABCMeta):
             x: whether any files or directories were absent and
               :ref:`-m <check-empty--m>` /
               :ref:`--may-not-exist <check-empty---may-not-exist>` was omitted
-            d: whether any :exc:`OSError` was caught while processing files.
+            d: whether any :exc:`OSError` were caught while processing files.
 
         Returns:
             An integer derived from the arguments, which will be returned by

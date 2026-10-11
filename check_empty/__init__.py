@@ -10,7 +10,7 @@ from __future__ import annotations
 from check_empty import constants, reporter
 
 __all__ = ('Handler', 'check', 'default_reporter')
-__version__ = '3.0.1'
+__version__ = '4.0.0'
 """The version of the package."""
 default_reporter: reporter.Reporter = reporter.Reporter()
 """The default reporter used by :func:`check`."""
@@ -322,6 +322,6 @@ def check(
             Handler(*i, a).o()
     x, d = k[1] if z is None else len(z) - 1, k[2] if w is None else len(w)
     y, p = k[3] if r is None else len(r), k[0] if b is None else len(b) - 1
-    reporter.report(z, w, v, b, r, x, y, d, p, n, t, verbosity, clear)
+    reporter.report(z, v, b, ra, r, w, x, y, d, p, n, t, verbosity, clear)
     reporter.reset_out()
     return reporter.calculate_result(*map(bool, (y, x and not may_not_exist, d)))

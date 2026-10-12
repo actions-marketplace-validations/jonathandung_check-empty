@@ -77,7 +77,7 @@ l=%d
         ),
         g(map(str, a[5])),
         *a[6:12],
-        bool(a[13] and a[7] and not (a[6] and not d['may_not_exist']) and not a[8]),
+        bool(a[7] and a[13] and not a[8] and (not a[6] or d['may_not_exist'])),
     )
 )
 

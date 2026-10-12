@@ -52,10 +52,3 @@ check\_empty.reporter.exceptions module
 .. automodule:: check_empty.reporter.exceptions
   :members:
   :show-inheritance:
-
-check\_empty.\_\_main\_\_ module
---------------------------------
-
-.. automodule:: check_empty.__main__
-  :members:
-  :show-inheritance:

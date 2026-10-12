@@ -84,8 +84,8 @@ class ReporterABC(metaclass=a.ABCMeta):
 
         Returns:
             An integer derived from the arguments, which will be returned by
-            :func:`~check_empty.check` and act as the exit code if
-            :func:`~check_empty.__main__.main` instrumented the check.
+            :func:`~check_empty.check` and act as the exit code if the check
+            was run as the main routine via :func:`~main`.
         """
         return y | x << 2 | d << 3
 

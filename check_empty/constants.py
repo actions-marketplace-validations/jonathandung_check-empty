@@ -58,9 +58,5 @@ class RecurseInto(__import__('enum').IntFlag):
     """Recurse into all archive types."""
 
 
-ARCHIVE_FORMATS: Final[tuple[RecurseInto, ...]] = tuple(
-    filter(lambda x: x > 0 == x & (x - 1), RecurseInto)
-    if __import__('sys').version_info < (3, 11)
-    else RecurseInto
-)
+ARCHIVE_FORMATS: Final = tuple(RecurseInto)
 del os, TYPE_CHECKING

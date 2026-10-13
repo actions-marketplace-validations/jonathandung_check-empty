@@ -10,7 +10,7 @@ from __future__ import annotations
 from check_empty import constants, reporter
 
 __all__ = ('Handler', 'check', 'default_reporter')
-__version__ = '4.0.0'
+__version__ = '4.1.0'
 """The version of the package."""
 default_reporter: reporter.Reporter = reporter.Reporter()
 """The default reporter used by :func:`check`."""
@@ -18,10 +18,9 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from types import TracebackType
-    from typing import Any, SupportsIndex
+    from typing import Any, Self, SupportsIndex
 
     from _typeshed import FileDescriptorOrPath
-    from typing_extensions import Self
 
 
 class Handler:

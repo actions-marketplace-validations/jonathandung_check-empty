@@ -11,7 +11,7 @@ extensions = [
     'sphinx_argparse_cli',
     'sphinx_copybutton',
 ]
-release = '4.0.0'
+release = '4.1.0'
 html_short_title = f'check-empty {release} docs'
 html_theme = 'furo'
 html_theme_options = {
@@ -31,4 +31,4 @@ nitpicky = True
 nitpick_ignore_regex = [('py:class', r'(arpy\.)?Archive')]
 project = 'check-empty'
 pygments_style = 'sphinx'
-version = '4.0'
+version = '4.1'

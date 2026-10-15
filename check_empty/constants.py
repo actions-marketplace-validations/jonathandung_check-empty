@@ -49,11 +49,11 @@ class RecurseInto(__import__('enum').IntFlag):
     TYPICAL = 15
     """Recurse into the most common archive types, namely .zip, .tar, .7z, and .rar."""
     AR = 16
-    """Recurse into .a, .ar and .lib archives; requires :mod:`!arpy`."""
+    """Recurse into .a, .ar and .lib archives; requires `arpy <https://github.com/onekey-sec/arpy>`__."""
     LZH = 32
-    """Recurse into .lzh and .lha archives; requires :mod:`!lhafile`."""
+    """Recurse into .lzh and .lha archives; requires `lhafile <https://github.com/FrodeSolheim/python-lhafile>`__."""
     ACE = 64
-    """Recurse into .ace archives; requires :mod:`!acefile`."""
+    """Recurse into .ace archives; requires `acefile <https://apidoc.roe.ch/acefile/latest>`__."""
     ALL = 127
     """Recurse into all archive types."""
 

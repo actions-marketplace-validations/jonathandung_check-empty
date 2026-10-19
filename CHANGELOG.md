@@ -4,13 +4,15 @@ All notable changes to this project are and will be documented in this file.
 
 This project has used [Semantic Versioning](https://semver.org) starting from v2.0.0.
 
-## [4.1] - 2026-10-13
+## [4.1]
+
+## [4.1.0] - 2026-10-13
 
 Updated Python requirement to Python 3.11+.
 
 ## [4.0]
 
-### [4.1.0] - 2026-10-11
+### [4.0.0] - 2026-10-11
 
 Action bugfix; reporter API change.
 

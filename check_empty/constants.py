@@ -16,7 +16,8 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import Final
 TYPE_MASK: Final = 0xF000
-"""The mask that extracts the type of a file from its mode bits from :func:`os.stat`."""
+"""The mask that extracts the type of a file from its mode bits, as returned by
+:func:`os.stat`."""
 S_IFDIR: Final = 0x4000
 """Equal to :data:`stat.S_IFDIR`."""
 ENOENT: Final = 2

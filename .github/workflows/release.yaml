@@ -1,4 +1,6 @@
 name: Build and publish
+env:
+  TAG: ${{github.ref_name}}
 on:
   push: {tags: ["v[0-9]+.[0-9]+.[0-9]+"]}
 jobs:
@@ -9,18 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/check-empty/${{github.ref_name}}
+      url: https://pypi.org/project/check-empty/${{env.TAG}}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
-        with:
-          enable-cache: false
-      - run: uv build
-      - run: uv publish
-      - run: gh release create "$TAG" --title "$TAG" --generate-notes --discussion-category "Releases"
-        env:
-          GH_TOKEN: ${{github.token}}
-          TAG: ${{github.ref_name}}
-    timeout-minutes: 2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+      with:
+        enable-cache: false
+    - run: uv build
+    - run: uv publish
+    - run: gh release create "$TAG" --title "$TAG" --generate-notes --discussion-category "Releases"
+      env:
+        GH_TOKEN: ${{github.token}}
+    timeout-minutes: 1

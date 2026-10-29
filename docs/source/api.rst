@@ -11,37 +11,44 @@ Module contents
 Submodules
 ----------
 
-check\_empty.archives module
-----------------------------
+check\_empty.archives
+---------------------
 
 .. automodule:: check_empty.archives
   :members:
   :show-inheritance:
 
-check\_empty.constants module
------------------------------
+check\_empty.constants
+----------------------
 
 .. automodule:: check_empty.constants
   :members:
   :show-inheritance:
 
-check\_empty.reporter module
-----------------------------
+check\_empty.reporter
+---------------------
 
 .. automodule:: check_empty.reporter
   :members:
   :show-inheritance:
 
-check\_empty.util module
-------------------------
+check\_empty.reporter.abcdef
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: check_empty.util
+.. automodule:: check_empty.reporter.abcdef
   :members:
   :show-inheritance:
 
-check\_empty.\_\_main\_\_ module
---------------------------------
+check\_empty.reporter.dct
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: check_empty.__main__
+.. automodule:: check_empty.reporter.dct
+  :members:
+  :show-inheritance:
+
+check\_empty.reporter.exceptions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: check_empty.reporter.exceptions
   :members:
   :show-inheritance:

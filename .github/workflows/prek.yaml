@@ -9,21 +9,20 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: taiki-e/install-action@5bf6ce016fd2e72eefc647cbca1e4213f65955b8
-        with:
-          tool: prek
-      - run: prek update
-      - run: prek run --all-files
-      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
-        with:
-          assignees: jonathandung
-          branch: prek
-          commit-message: update prek hooks
-          delete-branch: true
-          sign-commits: true
-          signoff: true
-          title: Weekly prek hooks update
-    timeout-minutes: 3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283
+      with:
+        tool: prek
+    - run: prek update
+    - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+      with:
+        assignees: jonathandung
+        branch: prek
+        commit-message: update prek hooks
+        delete-branch: true
+        sign-commits: true
+        signoff: true
+        title: Weekly prek hooks update
+    timeout-minutes: 2

@@ -7,21 +7,85 @@ Pre-commit hook, command-line tool and GitHub Action all-in-one.
 
 from __future__ import annotations
 
-import os
+from check_empty import constants, reporter
 
-from . import constants, reporter, util
-
-if constants.TYPE_CHECKING:
-    from collections.abc import Iterable
-    from typing import SupportsIndex
-
-    from _typeshed import FileDescriptorOrPath
-
-__all__ = ('check', 'default_reporter')
-__version__ = '2.0.0'
+__all__ = ('Handler', 'check', 'default_reporter')
+__version__ = '4.1.0'
 """The version of the package."""
 default_reporter: reporter.Reporter = reporter.Reporter()
 """The default reporter used by :func:`check`."""
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+    from types import TracebackType
+    from typing import Any, Self, SupportsIndex
+
+    from _typeshed import FileDescriptorOrPath
+
+
+class Handler:
+    """Used to handle errors when opening a file."""
+
+    __slots__ = 'a', 'c', 'f', 'j', 'v'
+    a: int | str
+    """The file descriptor or string path to the file being handled."""
+    c: bool
+    """Whether an I/O error was handled."""
+    f: Callable[[OSError], object]
+    """The function to call on the I/O error being handled."""
+    j: Callable[[str], object]
+    """The function to call when handling the case where the file is missing.
+
+    Should take the path to the file or a string encapsulating the validity of the file
+    descriptor as the only argument.
+    """
+    v: str | None
+    """The cached value of :attr:`e`."""
+
+    def __init__(self, *a: Any):  # ruff: ignore[any-type]
+        """Initialize the handler."""
+        self.j, self.f, self.a = a
+        self.v = None
+
+    def __enter__(self) -> Self:
+        """Enter the handler context.
+
+        Returns:
+            The handler itself.
+        """
+        self.c = False
+        return self
+
+    def o(self) -> None:
+        """Clear the file immediately."""
+        with self, open(self.a, 'wb'):
+            ...
+
+    @property
+    def e(self, s: str = 'invalid fd (negative): %d', t: str = 'fd: %d') -> str:
+        """The file path itself, or the file descriptor coerced to a string."""
+        r = self.v
+        if r is None:
+            a = self.a
+            self.v = r = (t, s)[a < 0] % a if isinstance(a, int) else a
+        return r
+
+    def __exit__(
+        self,
+        t: type[BaseException] | None,
+        v: BaseException | None,
+        _: TracebackType | None,
+    ) -> bool:
+        """Exit the handler context.
+
+        Returns:
+            Whether there was an exception that is to be suppressed.
+        """
+        if t is None or not isinstance(v, OSError):
+            return False
+        self.j(self.e) if v.errno == constants.ENOENT else self.f(v)
+        self.c = True
+        return True
 
 
 def check(
@@ -31,7 +95,7 @@ def check(
     may_not_exist: bool = False,
     verbosity: SupportsIndex = 2,
     recurse_into: SupportsIndex = constants.RecurseInto.NONE,
-    reporter: reporter.ReporterABC = default_reporter,
+    reporter: reporter.abcdef.ReporterABC = default_reporter,
 ) -> int:
     # ruff: ignore[docstring-missing-exception]
     r"""Check the emptiness of files, recursing into directories if passed.
@@ -57,13 +121,15 @@ def check(
         The integer exit code calculated by the reporter.
 
     """
+    from contextlib import suppress
+    from os import fsdecode, scandir, stat
+
     files = list(files)
     if not files:
         return 0
     k, j, t, n, o = [0] * 5, [], 0, len(files), files.pop
     u, e, _ = j.extend, j.pop, lambda v: lambda _, k=k: k.__setitem__(v, k[v] + 1)
     verbosity, recurse_into = (type(x).__index__(x) for x in (verbosity, recurse_into))
-    # ruff: disable[magic-value-comparison]
     if verbosity > 4:
         b = ['']
         f = b.append
@@ -76,7 +142,7 @@ def check(
         v = ra = None
         x = aa = lambda _: None
     if verbosity > 2:
-        z, w = [''], ['']
+        z, w = [''], []
         i = z.append, w.append
     else:
         z = w = None
@@ -86,19 +152,17 @@ def check(
         g = r.append
     else:
         r, g = None, _(3)
-    # ruff: enable[magic-value-comparison]
-    zp, tr, rr, z7, lh = map(
-        recurse_into.__and__,
-        filter(lambda x: x > 0 == x & (x - 1), constants.RecurseInto),
-    )
+    zp, tr, rr, z7, ar, lh, ac = map(recurse_into.__and__, constants.ARCHIVE_FORMATS)
     an = bool(recurse_into)
     if an:
-        from . import archives as ar
+        from check_empty import archives as av
     md = 'a' if clear else 'r'
-    if constants.TYPE_CHECKING:
+    if TYPE_CHECKING:
         import tarfile as tr
         import zipfile as zp
 
+        import acefile as ac
+        import arpy as ar
         import lhafile as lh
         import py7zr as z7
         import rarfile as rr
@@ -107,6 +171,10 @@ def check(
             import tarfile as tr
         if zp:
             import zipfile as zp
+        if ac:
+            import acefile as ac
+        if ar:
+            import arpy as ar
         if lh:
             import lhafile as lh
         if z7:
@@ -115,8 +183,6 @@ def check(
             import rarfile as rr
 
     def ha(a: str) -> bool:
-        if not an:
-            return False
 
         def c() -> None:
             nonlocal t
@@ -134,15 +200,19 @@ def check(
             else:
                 f(a)
 
-        y = []
-        if tr and util.try_tar(a, y.append):
-            d = y.pop()
+        def v(f: Callable[[str], Any], e: type[BaseException]) -> bool:
+            nonlocal d
+            with suppress(e):
+                d = f(a)
+                return True
+            return False
+
+        if tr and v(tr.open, tr.TarError):
             aa(a)
             for r in d.getmembers():
                 a, s = q = r.name, r.size
                 e()
-            if clear:
-                ar.purge_tar(d)
+            av.purge_tar(d) if clear else d.close()
         elif zp and zp.is_zipfile(a):
             with zp.ZipFile(a, md) as d:
                 aa(a)
@@ -151,7 +221,7 @@ def check(
                     if s:
                         c()
                         if clear:
-                            ar.clear_file_in_zip(d, r)
+                            av.clear_file_in_zip(d, r)
                     else:
                         f(a)
         elif z7 and z7.is_7zfile(a):
@@ -161,7 +231,7 @@ def check(
                     a, s = q = r.filename, r.origin.stat().st_size
                     e()
                 if clear:
-                    ar.purge_7z(d)
+                    av.purge_7z(d)
         elif rr and rr.is_rarfile(a):
             m = 'Cannot clear files in RAR archives'
             with rr.RarFile(a) as d:
@@ -169,7 +239,19 @@ def check(
                 for r in d.infolist():
                     a, s = q = r.filename, r.file_size
                     w()
-        else:
+        elif ar and v(ar.Archive, ar.ArchiveFormatError):
+            aa(a)
+            for r in d.infolist():
+                a, s = q = r.name, r.size
+                e()
+            if clear:
+                av.purge_ar(d, ar.HEADER_GNU)
+        elif ac and v(ac.open, ac.AceError):
+            aa(a)
+            for r in filter(ac.AceMember.is_reg, d):
+                a, s = q = r.filename, r.size
+                w()
+        elif lh:
             try:
                 d = lh.LhaFile(a)
             except (RuntimeError, lh.BadLhafile):
@@ -179,32 +261,35 @@ def check(
             for r in d.filelist:
                 a, s = q = r.filename, r.file_size
                 w()
+        else:
+            return False
         return True
 
     def hb(a: str) -> bool:
         try:
-            return ha(a)
+            return an and ha(a)
         except Exception as e:  # ruff: ignore[blind-except]
-            i[1](str(e))
+            i[1](e)
             return True
 
     while files:
         a, q = o(), None
         m = isinstance(a, int)
         if not m:
-            a = os.fsdecode(a)
-            if hb(a):
-                continue
-        with util.Handler(*i, a) as h:
-            q = os.stat(a)  # ruff: ignore[os-stat]
+            a = fsdecode(a)
+        with Handler(*i, a) as h:
+            q = stat(a)  # ruff: ignore[os-stat]
         if q is None:
             continue
         c = h.e
         if q.st_mode & constants.TYPE_MASK == constants.S_IFDIR:
             if m:
                 raise constants.DIRFD_UNSUPPORTED
-            x(c)
-            u(os.scandir(c))
+            with h:
+                u(scandir(c))
+                x(c)
+            continue
+        if isinstance(a, str) and hb(a):
             continue
         s = q.st_size
         if not s:
@@ -219,8 +304,9 @@ def check(
         m = e()
         a = m.path
         if m.is_dir():
-            x(a)
-            u(os.scandir(a))
+            with Handler(*i, a):
+                u(scandir(a))
+                x(a)
             continue
         if hb(a):
             continue
@@ -232,10 +318,13 @@ def check(
         g((a, s))
         t += s
         if clear:
-            util.Handler(*i, a).o()
-    del j
-    x, d = k[1] if z is None else len(z) - 1, k[2] if w is None else len(w) - 1
-    y, p = k[3] if r is None else len(r), k[0] if b is None else len(b) - 1
-    reporter.report(z, w, v, b, r, x, y, d, p, n, t, verbosity, clear)
+            Handler(*i, a).o()
+    x, d, y, p = (
+        k[1] if z is None else len(z) - 1,
+        k[2] if w is None else len(w),
+        k[3] if r is None else len(r),
+        k[0] if b is None else len(b) - 1,
+    )
+    reporter.report(z, v, b, ra, r, w, x, y, d, p, n, t, verbosity, clear)
     reporter.reset_out()
     return reporter.calculate_result(*map(bool, (y, x and not may_not_exist, d)))

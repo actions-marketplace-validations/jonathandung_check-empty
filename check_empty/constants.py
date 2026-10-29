@@ -4,10 +4,6 @@ from __future__ import annotations
 
 import os
 
-TYPE_CHECKING: bool = False
-"""Redefined here to avoid importing :mod:`typing` at runtime."""
-if TYPE_CHECKING:
-    from typing import Final
 __all__ = (
     'DIRFD_UNSUPPORTED',
     'ENOENT',
@@ -16,13 +12,16 @@ __all__ = (
     'TYPE_MASK',
     'RecurseInto',
 )
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import Final
 TYPE_MASK: Final = 0xF000
-"""This mask extracts the type of a file from its mode bits from :func:`os.stat`."""
+"""The mask that extracts the type of a file from its mode bits using bitwise and."""
 S_IFDIR: Final = 0x4000
 """Equal to :data:`stat.S_IFDIR`."""
 ENOENT: Final = 2
 """Equal to :data:`errno.ENOENT`."""
-DIRFD_UNSUPPORTED: Final[BaseException] = (
+DIRFD_UNSUPPORTED: Final = (
     SystemError('got directory descriptor on Windows')
     if os.name == 'nt'
     else NotImplementedError('directory descriptors are not supported')
@@ -47,10 +46,17 @@ class RecurseInto(__import__('enum').IntFlag):
     The unfortunate name of this member is due to the fact that Python identifiers
     cannot start with a digit.
     """
-    LZH = 16
-    """Recurse into .lzh and .lha archives; requires :mod:`!lhafile`."""
-    ALL = 31
+    TYPICAL = 15
+    """Recurse into the most common archive types, namely .zip, .tar, .7z, and .rar."""
+    AR = 16
+    """Recurse into .a, .ar and .lib archives; requires `arpy <https://github.com/onekey-sec/arpy>`__."""
+    LZH = 32
+    """Recurse into .lzh and .lha archives; requires `lhafile <https://github.com/FrodeSolheim/python-lhafile>`__."""
+    ACE = 64
+    """Recurse into .ace archives; requires `acefile <https://apidoc.roe.ch/acefile/latest>`__."""
+    ALL = 127
     """Recurse into all archive types."""
 
 
-del os
+ARCHIVE_FORMATS: Final = tuple(RecurseInto)
+del os, TYPE_CHECKING

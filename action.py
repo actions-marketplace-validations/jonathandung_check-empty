@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GitHub Action logic as an unimportable script."""
+"""GitHub Actions logic."""
 
 from __future__ import annotations
 
@@ -13,7 +13,10 @@ from itertools import chain
 
 import check_empty.__main__
 
-k, C, E, p = dict.fromkeys, 0x100000 if os.name == 'nt' else 0x40000, os.environ, 0
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+k, C, E = dict.fromkeys, 0x100000 if os.name == 'nt' else 0x40000, os.environ
 B = k(('true', 'True', 'TRUE'), True)
 B.update(k(('false', 'False', 'FALSE'), False))
 
@@ -25,31 +28,38 @@ def _(name: str, default: bool = False) -> bool:
     try:
         return B[k]
     except KeyError:
-        m = (
-            f'Input does not meet YAML 1.2 "Core Schema" specification: {name}\n'
-            'Supported boolean inputs: "true | True | TRUE | false | False | FALSE"'
-        )
+        m = f'''Input does not meet YAML 1.2 "Core Schema" specification: {name}
+Supported boolean inputs: "true | True | TRUE | false | False | FALSE"'''
         raise TypeError(m) from None
 
 
-class R(check_empty.reporter.ReporterABC):
-    def report(self, *a) -> None:  # ruff: ignore[no-self-use]
-        global p
-        p, r = (
-            (
-                1
-                if a[12] and a[6] and not (a[5] and not d['may_not_exist']) and not a[7]
-                else 0
-            ),
-            a[4],
-        )
-        with open(E['GITHUB_OUTPUT'], 'ab', encoding='utf-8') as f:
+def g(x: Iterable[str] | None) -> bytes:
+    return (
+        b'W10='
+        if x is None
+        else b64encode(b'["%b"]' % b'", "'.join(map(str.encode, x)))
+    )
+
+
+class R(check_empty.reporter.abcdef.ReporterABC):
+    if TYPE_CHECKING:
+        o: str | None
+
+        def to(self, out: str) -> str | None: ...
+
+    def report(self, *a) -> None:
+        o = self.o
+        if o is None:
+            return
+        with open(o, 'ab') as f:
+            # fmt: off
             f.write(
-                b"""z=%s
-w=%s
-a=%s
-b=%s
-r=%s
+b"""z=%b
+a=%b
+b=%b
+e=%b
+r=%b
+w=%b
 x=%d
 y=%d
 d=%d
@@ -57,27 +67,24 @@ p=%d
 n=%d
 t=%d
 l=%d
-"""
-                % (
-                    *(
-                        b'W10='
-                        if x is None
-                        else b64encode(b'["%s"]' % b'", "'.join(map(str.encode, x)))
-                        for x in a[:4]
-                    ),
-                    b'e30='
-                    if r is None
-                    else b64encode(
-                        b'{%s}'
-                        % b', '.join(b'"%s": %d' % (k.encode(), v) for k, v in r)
-                    ),
-                    *a[5:11],
-                    p,
-                )
-            )
+""" % (
+        *map(g, a[:4]),
+        b'e30='
+        if a[4] is None
+        else b64encode(
+            b'{%b}'
+            % b', '.join(b'"%b": %d' % (k.encode(), v) for k, v in a[4])
+        ),
+        g(map(str, a[5])),
+        *a[6:12],
+        bool(a[7] and a[13] and not a[8] and (not a[6] or d['may_not_exist'])),
+    )
+)
 
 
-d = {k: _(k) for k in ('clear', 'may_not_exist')}
+# fmt: on
+d, x = {k: _(k) for k in ('clear', 'may_not_exist')}, R()
+x.to(E['GITHUB_OUTPUT'])
 r = check_empty.check(
     chain(
         E['CE_FILENAMES'].split('\n'),
@@ -92,7 +99,7 @@ r = check_empty.check(
     ),
     **d,
     recurse_into=int(E['CE_RECURSE_INTO'], 0),
-    reporter=R(),
+    reporter=x,
     verbosity=5,
 )
 if d['clear']:

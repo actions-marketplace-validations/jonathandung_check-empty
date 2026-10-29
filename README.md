@@ -1,4 +1,4 @@
-# [check-empty](https://pypi.org/p/check-empty)
+# [check-empty](https://pypi.org/project/check-empty/4.1.0)
 
 [![#StandWithPalestine](https://raw.githubusercontent.com/TheBSD/StandWithPalestine/main/badges/StandWithPalestine.svg)](https://github.com/TheBSD/StandWithPalestine/blob/main/docs/README.md)
 
@@ -13,13 +13,8 @@ specified.
 
 ## Prerequisites
 
-Supports CPython 3.8+, PyPy 7.3.7+, GraalPy 20.1+ out-of-the-box, and most likely every
-Python 3.8 runtime you can think of. This is the only requirement to use this tool.
-
-Prior to `check-empty` v2.0.0, which introduced recursion into archives and opened a
-host of attack vectors, Python 3.6+ was supported. However, the vulnerabilities are
-best mitigated by updating requirements, so if you are using Python 3.6 or 3.7 (which
-have reached end-of-life anyway), you should use version 1.2.3.
+Supports every Python 3.11 runtime. There are no other requirements unless you want to
+check if files in certain types of (compressed) archives are empty.
 
 ## Quickstart
 
@@ -87,15 +82,15 @@ As a pre-commit hook:
 # .pre-commit-config.yaml
 repos:
 - repo: https://github.com/jonathandung/check-empty
-  rev: v2.0.0 # repository version
+  rev: v4.1.0 # repository version
   hooks:
-    - id: check-empty # the hook
-      args: # example list of arguments
-        - -Q # flag to decrease output, applicable twice (shorthand for --quiet)
-      files: ^src/mylib/py\.typed|docs/\.nojekyll|static/\.gitkeep|some_dir/.*|.*\.lock$
-      # paths to files/directories to clear or keep empty as a single regular
-      # expression (as per the somewhat restrictive pre-commit config schema),
-      # relative to project root
+  - id: check-empty # the hook
+    args: # example list of arguments
+    - -Q # flag to decrease output, applicable twice (shorthand for --quiet)
+    files: ^src/mylib/py\.typed|docs/\.nojekyll|static/\.gitkeep|some_dir/.*|.*\.lock$
+    # paths to files/directories to clear or keep empty as a single regular
+    # expression (as per the somewhat restrictive pre-commit config schema),
+    # relative to project root
 ```
 
 equivalent in `prek.toml` format:
@@ -103,7 +98,7 @@ equivalent in `prek.toml` format:
 ```toml
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v2.0.0"
+rev = "v4.1.0"
 
 [[repos.hooks]]
 id = "check-empty"
@@ -127,7 +122,7 @@ or (TOML 1.1+):
 # using multiline inline tables
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v2.0.0"
+rev = "v4.1.0"
 hooks = [{
   id = "check-empty",
   args = ["-Q"],
@@ -147,18 +142,18 @@ As a GitHub Actions workflow step:
 
 ```yaml
 steps:
-- uses: jonathandung/check-empty@v2.0.0 # the latest version on the GitHub Actions
+- uses: jonathandung/check-empty@v4.1.0 # the latest version on the GitHub Actions
   # marketplace; this step will fail and subsequent jobs will not run if any file is
   # not empty
   with:
-    python-version: '3.14' # run the script on the latest stable Python version
-    # Python down to 3.8 is supported but not recommended due to end-of-life
+    python-version: '3.15' # run the script on the latest stable Python version
     filenames: |
       src/mylib/py.typed
       docs/.nojekyll
       static/.gitkeep
       some_dir
     globs: '**/*.lock'
+    # must use single quotes to escape asterisks, which refer to YAML aliases
     # can also be an array of globs joined into a newline-delimited multiline string,
     # as in filenames
 ```
@@ -184,11 +179,13 @@ are empty, but this project explicitly targets files, since version control syst
 track files rather than directories.
 6. The program can recurse into some archives if specified, but it requires certain
 libraries to be installed to do so for certain formats. .7z (corresponding to the `7z`
-extra) needs `py7zr`, .rar (the `rar` extra) needs `rarfile` and .lha / .lzh (the `lzh`
-extra) needs `lhafile`. These may also slow down the checking, since magic numbers
-must be read for every file, causing the I/O overhead to accumulate.
-7. Keep weird characters in your filenames to a minimum. Not that the code can't handle
-it, but it's a matter of best practice and compatibility.
+extra) needs `py7zr`, .rar (the `rar` extra) needs `rarfile`, .lha / .lzh (the `lzh`
+extra) needs `lhafile`, .a / .ar / .lib (the `ar` extra) needs `arpy`, .ace (the `ace`
+extra) needs `acefile`. These may also slow down the checking significantly for large
+directories, since magic numbers must be read for every file and the I/O overhead
+accumulates. All the above extras are included in the `all` extra.
+7. Keep weird characters in your filenames to a minimum. They may become a problem in
+GitHub Actions usage.
 
 ## Additional links
 
@@ -204,16 +201,16 @@ to read the
 and the
 [contributing guide](https://github.com/jonathandung/.github/blob/main/CONTRIBUTING.md).
 
-To build the docs locally (needs Python 3.12+ because of Sphinx), install with the
-`docs` [group](https://packaging.python.org/en/latest/specifications/dependency-groups)
-using a package manager that supports it (e.g. pip 25.1+ or uv 0.4.27+), preferably
-into a virtual environment.
+To build the docs locally (needs Python 3.12+ because of Sphinx), install the package
+with the `docs`
+[group](https://packaging.python.org/en/latest/specifications/dependency-groups) using
+a package manager that supports it (e.g. pip 25.1+ or uv 0.4.27+), preferably into a
+virtual environment.
 
 Tests are run with:
 
 ```bash
-python -m test_check_empty # explicit; or
-python -m unittest discover # alternative
+python -m test_check_empty
 ```
 
 at the project root. `pytest` is not needed.

@@ -319,8 +319,12 @@ def check(
         t += s
         if clear:
             Handler(*i, a).o()
-    x, d = k[1] if z is None else len(z) - 1, k[2] if w is None else len(w)
-    y, p = k[3] if r is None else len(r), k[0] if b is None else len(b) - 1
+    x, d, y, p = (
+        k[1] if z is None else len(z) - 1,
+        k[2] if w is None else len(w),
+        k[3] if r is None else len(r),
+        k[0] if b is None else len(b) - 1,
+    )
     reporter.report(z, v, b, ra, r, w, x, y, d, p, n, t, verbosity, clear)
     reporter.reset_out()
     return reporter.calculate_result(*map(bool, (y, x and not may_not_exist, d)))

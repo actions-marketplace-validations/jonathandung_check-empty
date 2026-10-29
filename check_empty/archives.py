@@ -89,11 +89,11 @@ def purge_ar(a: Archive, g: int) -> None:
         q = __import__('itertools').filterfalse(
             AR_SKIP.__contains__, map(__import__('operator').attrgetter('name'), i)
         )
-        _gnu(tuple(q), w) if i[0].type == g else _bsd(q, w)
+        __gnu(tuple(q), w) if i[0].type == g else __bsd(q, w)
     os.replace(f.name, n)
 
 
-def _bsd(q: Iterable[bytes], w: Callable[[bytes], int]) -> None:
+def __bsd(q: Iterable[bytes], w: Callable[[bytes], int]) -> None:
     """Clear the contents of each file in a BSD .a, .ar or .lib archive."""
     for m in q:
         x = len(m)
@@ -101,7 +101,7 @@ def _bsd(q: Iterable[bytes], w: Callable[[bytes], int]) -> None:
         w(AR_FS % (b'#1/%d' % x if b else m, x, m if b else b''))
 
 
-def _gnu(q: tuple[bytes, ...], w: Callable[[bytes], int]) -> None:
+def __gnu(q: tuple[bytes, ...], w: Callable[[bytes], int]) -> None:
     """Clear the contents of each file in a GNU .a, .ar or .lib archive."""
     c, d = 0, {}
     for m in q:

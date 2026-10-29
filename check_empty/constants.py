@@ -16,13 +16,12 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import Final
 TYPE_MASK: Final = 0xF000
-"""The mask that extracts the type of a file from its mode bits, as returned by
-:func:`os.stat`."""
+"""The mask that extracts the type of a file from its mode bits using bitwise and."""
 S_IFDIR: Final = 0x4000
 """Equal to :data:`stat.S_IFDIR`."""
 ENOENT: Final = 2
 """Equal to :data:`errno.ENOENT`."""
-DIRFD_UNSUPPORTED: Final[BaseException] = (
+DIRFD_UNSUPPORTED: Final = (
     SystemError('got directory descriptor on Windows')
     if os.name == 'nt'
     else NotImplementedError('directory descriptors are not supported')

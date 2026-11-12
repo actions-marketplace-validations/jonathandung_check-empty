@@ -1,9 +1,9 @@
 [build-system]
-requires = ["uv_build>=0.13.6"]
+requires = ["uv_build>=0.13.7"]
 build-backend = "uv_build"
 
 [dependency-groups]
-docs = ["furo==2025.12.19", "sphinx==9.2.0", "sphinx-argparse-cli==1.24.0", "sphinx-copybutton==0.5.2", "sphinx-notfound-page==1.1.0"]
+docs = ["furo==2025.12.19", "sphinx==9.2.0", "sphinx-argparse-cli==1.24.1", "sphinx-copybutton==0.5.2", "sphinx-notfound-page==1.1.0"]
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -16,12 +16,12 @@ maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 name = "check-empty"
 readme = "README.md"
 requires-python = ">=3.11"
-version = "4.1.0"
+version = "4.1.1"
 
 [project.optional-dependencies]
 "7z" = ["py7zr==1.1.4"]
 ace = ["acefile==0.6.14"]
-all = ["check-empty[7z,ace,ar,lzh,rar]==4.1.0"]
+all = ["check-empty[7z,ace,ar,lzh,rar]==4.1.1"]
 ar = ["arpy==2.4.0"]
 lzh = ["lhafile==0.3.1"]
 rar = ["rarfile==4.5"]
@@ -30,7 +30,7 @@ rar = ["rarfile==4.5"]
 check-empty = "check_empty.__main__:main"
 
 [tool.ruff]
-required-version = ">=0.17.1"
+required-version = ">=0.17.4"
 target-version = "py311"
 
 [tool.ruff.analyze]
@@ -66,6 +66,12 @@ combine-as-imports = true
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ty]
+overrides = [
+  {include = ["check_empty/__init__.py"], rules = {possibly-unresolved-reference = "ignore", redundant-condition = "ignore", unsound-assignment = "ignore"}},
+  {include = ["check_empty/reporter/exceptions.py"], rules = {incompatible-mutable-override = "ignore"}}
+]
+
 [tool.ty.analysis]
 respect-type-ignore-comments = false
 
@@ -77,17 +83,9 @@ python-platform = "all"
 all = "error"
 missing-override-decorator = "ignore"
 
-[[tool.ty.overrides]]
-include = ["check_empty/__init__.py"]
-rules = {possibly-unresolved-reference = "ignore", redundant-condition = "ignore", unsound-assignment = "ignore"}
-
-[[tool.ty.overrides]]
-include = ["check_empty/reporter/exceptions.py"]
-rules = {invalid-mutable-override = "ignore"}
-
 [tool.uv]
 preview = true
-required-version = ">=0.13.6"
+required-version = ">=0.13.7"
 
 [tool.uv.build-backend]
 module-name = "check_empty"
